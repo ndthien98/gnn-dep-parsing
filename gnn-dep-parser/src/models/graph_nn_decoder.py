@@ -168,7 +168,6 @@ class GraphNNDecoder(DependencyDecoder):
             head_rel = self.head_rel_gnn(FX, head_rel) + head_rel
             dept_rel = self.dept_rel_gnn(FX, dept_rel) + dept_rel
 
-
             print('HR dim: ', HR.dim())
             print('DR dim: ', DR.dim())
             print('FX dim: ', FX.dim())
