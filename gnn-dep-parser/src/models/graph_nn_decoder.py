@@ -136,17 +136,22 @@ class GraphNNDecoder(DependencyDecoder):
                 # ((L,), L*B)
                 arc_mat = dy.reshape(arc_mat, (sent_len,), flat_len)
                 # ((1,), L*B)
-                print('arc_mat', arc_mat.value())
-                print("truth['head']",truth['head'])
+                print('arc_mat val', arc_mat.value())
+                print('arc_mat dim', arc_mat.dim())
+                print("truth['head'] value",truth['head'])
+                print("truth['head'] lengt",truth['head'].__len__())
                 
                 arc_loss = dy.pickneglogsoftmax_batch(arc_mat, truth['head'])
                 print('arc_loss', arc_loss.value())
+                print('arc_loss', arc_loss.dim())
                 
                 # (1,)
 
                 arc_loss = dy.sum_batches(arc_loss*masks_flat)/total_token
-                print('arc_loss', arc_loss)
-                gnn_losses.append(arc_loss)
+                print('arc_loss', arc_loss.value)
+                print('arc_loss', arc_loss.dim())
+                
+                gnn_losses.append(arc_loss.value())
                 input("pause")
 
             # Aggregation Function
