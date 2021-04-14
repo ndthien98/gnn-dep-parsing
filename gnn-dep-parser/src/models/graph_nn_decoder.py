@@ -98,23 +98,7 @@ class GraphNNDecoder(DependencyDecoder):
             head_rel = dy.dropout_dim(head_rel, 1, self.cfg.MLP_DROP)
             dept_arc = dy.dropout_dim(dept_arc, 1, self.cfg.MLP_DROP)
             dept_rel = dy.dropout_dim(dept_rel, 1, self.cfg.MLP_DROP)
-        
-        print('m1',masks['1D'].__len__())
-        print('m1',masks['1D'][0].__len__())
-        print('m2',masks['2D'].__len__())
-        print('m2',masks['2D'][0].__len__())
-        print('mf',masks['flat'].__len__())
-        print(masks['2D'])
-        s = ''
 
-        for b in range(masks['2D'][0][0].__len__()):
-            for x in range(masks['2D'].__len__()):
-                for y in range(masks['2D'][0].__len__()):
-                    s = s + str(int(masks['2D'][x][y][b])) + ' '
-                s = s + '\n'
-            s = s + '\nendbat\n'
-        s = s + '\n'
-        print(s)
         # ((L, L), B)
         masks_2D = 1e9*(1-dy.inputTensor(masks['2D'], True))
 
@@ -132,6 +116,9 @@ class GraphNNDecoder(DependencyDecoder):
             # ((L, L), B)
             arc_mat = self.arc_attn_mat[k](head_arc, dept_arc)/arc_norm-masks_2D
             arc_prob = dy.softmax(arc_mat)
+            print(arc_mat)
+            print(arc_prob)
+            input("input")
 
             print('arc_mat dim: ', arc_mat.dim())
             print('arc_prob dim: ', arc_prob.dim())
