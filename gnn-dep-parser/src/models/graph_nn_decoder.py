@@ -162,8 +162,6 @@ class GraphNNDecoder(DependencyDecoder):
             print('head_rel dim: ', head_rel.dim())
             print('dept_rel dim: ', dept_rel.dim())
 
-            
-
         # ((L, L), B)
         arc_mat = self.arc_attn_mat[-1](head_arc, dept_arc)/arc_norm-masks_2D
         # ((L,), L*B)
@@ -177,8 +175,6 @@ class GraphNNDecoder(DependencyDecoder):
         print('arc_mat dim: ', arc_mat.dim())
         print('head_rel dim: ', head_rel.dim())
         print('dept_rel dim: ', dept_rel.dim())
-
-            
 
         if is_train:
             # ((1,), L*B)
