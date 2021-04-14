@@ -15,6 +15,7 @@ import sys
 import time
 import logging
 import multiprocessing as mp
+import dynet
 random.seed(666)
 np.random.seed(666)
 
