@@ -98,15 +98,16 @@ class GraphNNDecoder(DependencyDecoder):
             head_rel = dy.dropout_dim(head_rel, 1, self.cfg.MLP_DROP)
             dept_arc = dy.dropout_dim(dept_arc, 1, self.cfg.MLP_DROP)
             dept_rel = dy.dropout_dim(dept_rel, 1, self.cfg.MLP_DROP)
+        
         print('m1',masks['1D'].__len__())
         print('m1',masks['1D'][0].__len__())
         print('m2',masks['2D'].__len__())
         print('m2',masks['2D'][0].__len__())
         print('mf',masks['flat'].__len__())
-
+        print(masks['2D'])
         # ((L, L), B)
         masks_2D = 1e9*(1-dy.inputTensor(masks['2D'], True))
-        
+
         print('mask_2D', masks_2D.dim())
         # (1, L*B)
         masks_flat = dy.inputTensor(masks['flat'], True)
