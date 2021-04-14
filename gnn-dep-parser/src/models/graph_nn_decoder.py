@@ -100,8 +100,10 @@ class GraphNNDecoder(DependencyDecoder):
 
         # ((L, L), B)
         masks_2D = 1e9*(1-dy.inputTensor(masks['2D'], True))
+        print('mask_2D', masks_2D.dim())
         # (1, L*B)
         masks_flat = dy.inputTensor(masks['flat'], True)
+        print('masks_flat', masks_flat.dim())
 
         gnn_losses = []
         arc_norm = math.sqrt(self.arc_size)
