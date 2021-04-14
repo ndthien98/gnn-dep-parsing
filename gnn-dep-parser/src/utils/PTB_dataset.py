@@ -61,6 +61,7 @@ def shadow_padding(batch_input, vocabulary):
         # Mask
         ins_mask = [1]*(maxlen-padding_length) + [0]*padding_length
         masks['1D'].append(ins_mask)
+        print(masks['1D'])
 
     # Build [1D], [2D], [Flat] masks
     zero = [0] * maxlen
