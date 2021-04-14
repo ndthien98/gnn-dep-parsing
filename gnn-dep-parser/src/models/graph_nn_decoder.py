@@ -100,8 +100,8 @@ class GraphNNDecoder(DependencyDecoder):
             dept_rel = dy.dropout_dim(dept_rel, 1, self.cfg.MLP_DROP)
 
         # ((L, L), B)
-        
-        print('mask_2D', masks_2D.value())
+
+        print('mask_2D', dy.inputTensor(masks['2D'], True).value())
         masks_2D = 1e9*(1-dy.inputTensor(masks['2D'], True))
 
         print('mask_2D', masks_2D.value())
