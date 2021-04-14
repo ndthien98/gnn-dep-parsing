@@ -93,7 +93,7 @@ def main():
     train_batch = datasets.get_batches('train', cfg.TRAIN_BATCH_SIZE, True, cmp, True)
     valid_batch = list(datasets.get_batches('dev', cfg.TEST_BATCH_SIZE, False, cmp, False))
     test_batch = list(datasets.get_batches('test', cfg.TEST_BATCH_SIZE, False, cmp, False))
-
+    dynet.print_text_graphviz()
     # Train model
     BEST_DEV_LAS = BEST_DEV_UAS = BEST_ITER = 0
     cnt_iter = -cfg.WARM * cfg.GRAPH_LAYERS
