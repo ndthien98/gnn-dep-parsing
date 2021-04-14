@@ -108,7 +108,11 @@ class GraphNNDecoder(DependencyDecoder):
         s = ''
         for i in masks['2D']:
             for j in i:
-                s = s + str(j)
+                for k in j:
+                    s = s + str(k)
+                s = s + '\n'
+            s = s + '\n'
+            s = s + '\n'
             s = s + '\n'
         print(s)
         # ((L, L), B)
