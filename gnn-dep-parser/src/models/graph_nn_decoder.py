@@ -110,7 +110,7 @@ class GraphNNDecoder(DependencyDecoder):
         for b in range(masks['2D'][0][0].__len__()):
             for x in range(masks['2D'].__len__()):
                 for y in range(masks['2D'][0].__len__()):
-                    s = s + str(masks['2D'][x][y][b])
+                    s = s + str(int(masks['2D'][x][y][b])) + ' '
                 s = s + '\n'
             s = s + '\nendbat\n'
         s = s + '\n'
