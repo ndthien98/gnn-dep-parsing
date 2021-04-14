@@ -149,6 +149,8 @@ def main():
             my_eval.add_truth('Test', truth)
             my_eval.add_pred('Test', pred)
         my_eval.evaluation('Test', cfg.PRED_TEST, cfg.TEST)
+        
+        break
     my_eval.print_best_result('Valid')
 
     # Final Test
