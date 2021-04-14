@@ -106,14 +106,14 @@ class GraphNNDecoder(DependencyDecoder):
         print('mf',masks['flat'].__len__())
         print(masks['2D'])
         s = ''
-        for i in masks['2D']:
-            for j in i:
-                for k in j:
-                    s = s + str(k)
+
+        for b in range(masks['2D'][0][0].__len__()):
+            for x in range(masks['2D'].__len__()):
+                for y in range(masks['2D'][0].__len__()):
+                    s = s + str(masks['2D'][x][y][b])
                 s = s + '\n'
-            s = s + '\n'
-            s = s + '\n'
-            s = s + '\n'
+            s = s + '\nendbat\n'
+        s = s + '\n'
         print(s)
         # ((L, L), B)
         masks_2D = 1e9*(1-dy.inputTensor(masks['2D'], True))
