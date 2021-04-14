@@ -94,8 +94,7 @@ def main():
     valid_batch = list(datasets.get_batches('dev', cfg.TEST_BATCH_SIZE, False, cmp, False))
     test_batch = list(datasets.get_batches('test', cfg.TEST_BATCH_SIZE, False, cmp, False))
     
-    dy.print_text_graphviz()
-    dy.print_graphviz()
+
     # Train model
     BEST_DEV_LAS = BEST_DEV_UAS = BEST_ITER = 0
     cnt_iter = -cfg.WARM * cfg.GRAPH_LAYERS
@@ -151,8 +150,9 @@ def main():
             my_eval.add_truth('Test', truth)
             my_eval.add_pred('Test', pred)
         my_eval.evaluation('Test', cfg.PRED_TEST, cfg.TEST)
-        if cnt_iter > 10:
+        if cnt_iter > 2:
             break
+    
     my_eval.print_best_result('Valid')
 
     # Final Test

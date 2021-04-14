@@ -62,30 +62,34 @@ class GraphNNDecoder(DependencyDecoder):
         flat_len = sent_len * batch_size
 
         print('===Vào call===')
-        print('input length: ', inputs.__len__())
-        print('input dim: ', inputs[1].dim())
-        print('sent_len', sent_len)
-        print('batch_size', batch_size)
-        print('flat_len', flat_len)
+        print('input length: ', inputs.__len__()) # input length:  46
+        print('input dim: ', inputs[1].dim()) # input dim:  ((400,), 2)
+        print('sent_len', sent_len) # sent_len 46
+        print('batch_size', batch_size) # batch_size 2
+        print('flat_len', flat_len) # flat_len 92
 
         # H -> hidden size, L -> sentence length, B -> batch size
         # ((H, L), B)
-        X = dy.concatenate_cols(inputs)
-        print('X dim: ', X.dim())
+        X = dy.concatenate_cols(inputs) 
+        print('X dim: ', X.dim())# X dim:  ((400, 46), 2)
         if is_train: X = dy.dropout_dim(X, 1, self.cfg.MLP_DROP)
+
         # A_H -> ARC MLP hidden size, R_H -> REL MLP hidden size
         # ((A_H, L), B)
         head_arc = self.head_arc_MLP(X, is_train)
         dept_arc = self.dept_arc_MLP(X, is_train)
         print('head_arc dim: ', head_arc.dim())
         print('dept_arc dim: ', dept_arc.dim())
-        
+# head_arc dim:  ((300, 46), 2)
+# dept_arc dim:  ((300, 46), 2)
+
         # ((R_H, L), B)
         head_rel = self.head_rel_MLP(X, is_train)
         dept_rel = self.dept_rel_MLP(X, is_train)
         print('head_rel dim: ', head_rel.dim())
         print('dept_rel dim: ', dept_rel.dim())
-
+# head_rel dim:  ((100, 46), 2)
+# dept_rel dim:  ((100, 46), 2)
 
         if is_train:
             total_token = sum(masks['flat'].tolist())
@@ -111,6 +115,8 @@ class GraphNNDecoder(DependencyDecoder):
 
             print('arc_mat dim: ', arc_mat.dim())
             print('arc_prob dim: ', arc_prob.dim())
+# arc_mat dim:  ((46, 46), 2)
+# arc_prob dim:  ((46, 46), 2)
 
             # Layer-wise Loss
             if is_train:
@@ -133,6 +139,9 @@ class GraphNNDecoder(DependencyDecoder):
             print('HX dim: ', HX.dim())
             print('DX dim: ', DX.dim())
             print('FX dim: ', FX.dim())
+# HX dim:  ((300, 46), 2)
+# DX dim:  ((300, 46), 2)
+# FX dim:  ((300, 46), 2)
 
             # Async Update Function
             # Head-first
@@ -144,6 +153,9 @@ class GraphNNDecoder(DependencyDecoder):
             print('head_arc dim: ', head_arc.dim())
             print('FX_new dim: ', FX_new.dim())
             print('dept_arc dim: ', dept_arc.dim())
+# head_arc dim:  ((300, 46), 2)
+# FX_new dim:  ((300, 46), 2)
+# dept_arc dim:  ((300, 46), 2)
 
             # Relation Aggregation Function
             # Sync update 
@@ -158,9 +170,14 @@ class GraphNNDecoder(DependencyDecoder):
             print('HR dim: ', HR.dim())
             print('DR dim: ', DR.dim())
             print('FX dim: ', FX.dim())
+# HR dim:  ((100, 46), 2)
+# DR dim:  ((100, 46), 2)
+# FX dim:  ((100, 46), 2)
 
             print('head_rel dim: ', head_rel.dim())
             print('dept_rel dim: ', dept_rel.dim())
+# head_rel dim:  ((100, 46), 2)
+# dept_rel dim:  ((100, 46), 2)
 
         # ((L, L), B)
         arc_mat = self.arc_attn_mat[-1](head_arc, dept_arc)/arc_norm-masks_2D
@@ -175,6 +192,9 @@ class GraphNNDecoder(DependencyDecoder):
         print('arc_mat dim: ', arc_mat.dim())
         print('head_rel dim: ', head_rel.dim())
         print('dept_rel dim: ', dept_rel.dim())
+# arc_mat dim:  ((46,), 92)
+# head_rel dim:  ((100, 92), 1)
+# dept_rel dim:  ((100,), 92)
 
         if is_train:
             # ((1,), L*B)
