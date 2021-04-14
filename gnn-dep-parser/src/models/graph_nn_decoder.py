@@ -116,8 +116,8 @@ class GraphNNDecoder(DependencyDecoder):
             # ((L, L), B)
             arc_mat = self.arc_attn_mat[k](head_arc, dept_arc)/arc_norm-masks_2D
             arc_prob = dy.softmax(arc_mat)
-            print(arc_mat)
-            print(arc_prob)
+            print(arc_mat.value())
+            print(arc_prob.value())
             input("input")
 
             print('arc_mat dim: ', arc_mat.dim())
