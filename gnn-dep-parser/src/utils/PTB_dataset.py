@@ -76,7 +76,7 @@ def shadow_padding(batch_input, vocabulary):
     masks['2D'] = np.transpose(np.array(masks['2D'])) - np.eye(maxlen).reshape((maxlen, maxlen, 1))
     masks['2D'][masks['2D'] == -1] = 0
     masks['flat'] = np.array(masks['flat'])
-    print(masks[])
+    
     return inputs, masks, truth
 
 
