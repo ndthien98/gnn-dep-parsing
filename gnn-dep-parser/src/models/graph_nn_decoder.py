@@ -24,29 +24,40 @@ class GraphNNDecoder(DependencyDecoder):
         pc = model.add_subcollection()
         # MLP layer
         orth_init = OrthogonalInitializer
-        self.head_arc_MLP = MLP(pc, cfg.ARC_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
-        self.head_rel_MLP = MLP(pc, cfg.REL_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
-        self.dept_arc_MLP = MLP(pc, cfg.ARC_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
-        self.dept_rel_MLP = MLP(pc, cfg.REL_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
+        self.head_arc_MLP = MLP(
+            pc, cfg.ARC_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
+        self.head_rel_MLP = MLP(
+            pc, cfg.REL_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
+        self.dept_arc_MLP = MLP(
+            pc, cfg.ARC_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
+        self.dept_rel_MLP = MLP(
+            pc, cfg.REL_MLP_SIZE, leaky_relu, cfg.MLP_DROP, cfg.MLP_BIAS, orth_init)
 
         # Biaffine Attention Layer (Arc)
         arc_size = cfg.ARC_MLP_SIZE[-1]
         zero_init = dy.ConstInitializer(0)
         self.arc_attn_mat = [
-            BiaffineMatAttention(pc, arc_size, arc_size, 1, True, False, zero_init)
+            BiaffineMatAttention(pc, arc_size, arc_size,
+                                 1, True, False, zero_init)
             for _ in range(cfg.GRAPH_LAYERS+1)]
 
         # Biaffine Attention Layer (Rel)
         rel_num = vocabulary.get_vocab_size('rel')
         rel_size = cfg.REL_MLP_SIZE[-1]
-        self.rel_mask = np.array( [1] + [0] * (rel_num-1))   # mask root relation
-        self.rel_attn = BiaffineMatAttention(pc, rel_size, rel_size, rel_num, True, True, zero_init)
+        self.rel_mask = np.array(
+            [1] + [0] * (rel_num-1))   # mask root relation
+        self.rel_attn = BiaffineMatAttention(
+            pc, rel_size, rel_size, rel_num, True, True, zero_init)
 
         # Graph Network Layer
-        self.head_gnn = GraphNNUnit( pc, arc_size, arc_size, leaky_relu, orth_init)
-        self.dept_gnn = GraphNNUnit( pc, arc_size, arc_size, leaky_relu, orth_init)
-        self.head_rel_gnn = GraphNNUnit( pc, rel_size, rel_size, leaky_relu, orth_init)
-        self.dept_rel_gnn = GraphNNUnit( pc, rel_size, rel_size, leaky_relu, orth_init)
+        self.head_gnn = GraphNNUnit(
+            pc, arc_size, arc_size, leaky_relu, orth_init)
+        self.dept_gnn = GraphNNUnit(
+            pc, arc_size, arc_size, leaky_relu, orth_init)
+        self.head_rel_gnn = GraphNNUnit(
+            pc, rel_size, rel_size, leaky_relu, orth_init)
+        self.dept_rel_gnn = GraphNNUnit(
+            pc, rel_size, rel_size, leaky_relu, orth_init)
 
         # Graph Layer WarmUp
         self.warm_list = [-i*cfg.WARM for i in range(cfg.GRAPH_LAYERS, -1, -1)]
@@ -62,18 +73,18 @@ class GraphNNDecoder(DependencyDecoder):
         flat_len = sent_len * batch_size
 
         print('===Vào call===')
-        print('input length: ', inputs.__len__()) # input length:  46
-        print('input dim: ', inputs[1].dim()) # input dim:  ((400,), 2)
-        print('sent_len', sent_len) # sent_len 46
-        print('batch_size', batch_size) # batch_size 2
-        print('flat_len', flat_len) # flat_len 92
-
+        print('input length: ', inputs.__len__())  # input length:  46
+        print('input dim: ', inputs[1].dim())  # input dim:  ((400,), 2)
+        print('sent_len', sent_len)  # sent_len 46
+        print('batch_size', batch_size)  # batch_size 2
+        print('flat_len', flat_len)  # flat_len 92
 
         # H -> hidden size, L -> sentence length, B -> batch size
         # ((H, L), B)
-        X = dy.concatenate_cols(inputs) 
-        print('X dim: ', X.dim())# X dim:  ((400, 46), 2)
-        if is_train: X = dy.dropout_dim(X, 1, self.cfg.MLP_DROP)
+        X = dy.concatenate_cols(inputs)
+        print('X dim: ', X.dim())  # X dim:  ((400, 46), 2)
+        if is_train:
+            X = dy.dropout_dim(X, 1, self.cfg.MLP_DROP)
 
         # A_H -> ARC MLP hidden size, R_H -> REL MLP hidden size
         # ((A_H, L), B)
@@ -101,29 +112,21 @@ class GraphNNDecoder(DependencyDecoder):
 
         # ((L, L), B)
 
-        print('mask_2D', dy.inputTensor(masks['2D'], True).value())
         masks_2D = 1e9*(1-dy.inputTensor(masks['2D'], True))
 
-        print('mask_2D', masks_2D.value())
-        # (1, L*B)
         masks_flat = dy.inputTensor(masks['flat'], True)
-        print('masks_flat', masks_flat.dim())
 
         gnn_losses = []
         arc_norm = math.sqrt(self.arc_size)
         rel_norm = math.sqrt(self.rel_size)
         for k in range(self.cfg.GRAPH_LAYERS):
-            print('----layer-----',k)
+            print('----layer-----', k)
             # Graph Weights
             # ((L, L), B)
-            arc_mat = self.arc_attn_mat[k](head_arc, dept_arc)/arc_norm-masks_2D
+            arc_mat = self.arc_attn_mat[k](
+                head_arc, dept_arc)/arc_norm-masks_2D
             arc_prob = dy.softmax(arc_mat)
-            print(arc_mat.value())
-            print(arc_prob.value())
-            input("input")
 
-            print('arc_mat dim: ', arc_mat.dim())
-            print('arc_prob dim: ', arc_prob.dim())
 # arc_mat dim:  ((46, 46), 2)
 # arc_prob dim:  ((46, 46), 2)
 
@@ -133,10 +136,18 @@ class GraphNNDecoder(DependencyDecoder):
                 # ((L,), L*B)
                 arc_mat = dy.reshape(arc_mat, (sent_len,), flat_len)
                 # ((1,), L*B)
+                print('arc_mat', arc_mat.value())
+                print("truth['head']",truth['head'])
+                
                 arc_loss = dy.pickneglogsoftmax_batch(arc_mat, truth['head'])
+                print('arc_loss', arc_loss.value())
+                
                 # (1,)
+
                 arc_loss = dy.sum_batches(arc_loss*masks_flat)/total_token
+                print('arc_loss', arc_loss)
                 gnn_losses.append(arc_loss)
+                input("pause")
 
             # Aggregation Function
             # Fusion head and dept representation
@@ -144,7 +155,7 @@ class GraphNNDecoder(DependencyDecoder):
             HX = head_arc * arc_prob
             DX = dept_arc * dy.transpose(arc_prob)
             FX = HX + DX
-            
+
             print('HX dim: ', HX.dim())
             print('DX dim: ', DX.dim())
             print('FX dim: ', FX.dim())
@@ -167,7 +178,7 @@ class GraphNNDecoder(DependencyDecoder):
 # dept_arc dim:  ((300, 46), 2)
 
             # Relation Aggregation Function
-            # Sync update 
+            # Sync update
             # ((R_H, L), B)
             HR = head_rel * arc_prob
             DR = dept_rel * dy.transpose(arc_prob)
@@ -221,8 +232,9 @@ class GraphNNDecoder(DependencyDecoder):
             # (1,)
             rel_loss = dy.sum_batches(rel_losses*masks_flat) / total_token
             # Final Total Loss with Layer-wise
-            warm = [int(iters>=x) for x in self.warm_list]
-            losses = rel_loss*self.cfg.LAMBDA2*warm[-1]+arc_loss*self.cfg.LAMBDA2*warm[-1]
+            warm = [int(iters >= x) for x in self.warm_list]
+            losses = rel_loss*self.cfg.LAMBDA2 * \
+                warm[-1]+arc_loss*self.cfg.LAMBDA2*warm[-1]
             if gnn_losses:
                 for i in range(self.cfg.GRAPH_LAYERS):
                     gnn_losses[i] *= warm[i]
@@ -233,7 +245,8 @@ class GraphNNDecoder(DependencyDecoder):
             if is_tree:
                 # MST Inference, Achieve Tree Edge.
                 arc_probs = dy.softmax(arc_mat).npvalue()
-                arc_probs = np.reshape(arc_probs, (sent_len, sent_len, batch_size), 'F')
+                arc_probs = np.reshape(
+                    arc_probs, (sent_len, sent_len, batch_size), 'F')
                 arc_probs = np.transpose(arc_probs)
                 # Mask PAD
                 arc_masks = [np.array(masks['flat'][i:i+sent_len])
@@ -250,7 +263,8 @@ class GraphNNDecoder(DependencyDecoder):
                 # Greedy Inference (argmax)
                 arc_pred = np.argmax(arc_mat.npvalue(), 0)
             # Pick Predicted Edge's <Head, Dept> pair.
-            flat_pred = [j+(i//sent_len)*sent_len for i, j in enumerate(arc_pred)]
+            flat_pred = [j+(i//sent_len)*sent_len for i,
+                         j in enumerate(arc_pred)]
             pred_rel = dy.pick_batch(head_rel, flat_pred, 1)
             # Predict Relation (mask ROOT)
             rel_mask = 1e9*dy.inputTensor(self.rel_mask)
